@@ -1,4 +1,5 @@
-﻿@model LoginViewModel;
+﻿﻿
+@model LoginViewModel;
 
 <div class="container mt-5">
     <div class="text-center mb-4">
@@ -30,21 +31,23 @@
         </div>
     </form>
 </div>
-@section Scripts{
-	<script>
-		function togglePasswordVisibility() {
-			const passwordInput = document.getElementById('passwordInput');
-			const toggleIcon = document.getElementById('toggleIcon');
 
-			if (passwordInput.type === 'password') {
-				passwordInput.type = 'text'; // Cambia a texto
-				toggleIcon.classList.remove('bi-eye');
-				toggleIcon.classList.add('bi-eye-slash');
-			} else {
-				passwordInput.type = 'password'; // Cambia a contraseña
-				toggleIcon.classList.remove('bi-eye-slash');
-				toggleIcon.classList.add('bi-eye');
-			}
-		}
-	</script>
+@section Scripts {
+
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById("passwordInput");
+            const toggleIcon = document.getElementById("toggleIcon");
+			
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text"; // Cambia a texto
+                toggleIcon.classList.remove("bi-eye");
+                toggleIcon.classList.add("bi-eye-slash");
+            } else {
+                passwordInput.type = "password"; // Cambia a contraseña
+                toggleIcon.classList.remove("bi-eye-slash");
+                toggleIcon.classList.add("bi-eye");
+            }
+        }
+    </script>
 }
