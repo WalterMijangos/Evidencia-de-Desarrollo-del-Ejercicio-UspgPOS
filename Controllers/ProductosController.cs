@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +15,12 @@ namespace UspgPOS.Controllers
     public class ProductosController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly Cloudinary _cloudinary;
 
-        public ProductosController(AppDbContext context)
+        public ProductosController(AppDbContext context, Cloudinary cloudinary)
         {
             _context = context;
+            _cloudinary = cloudinary;
         }
 
         // GET: Productos
@@ -59,10 +63,27 @@ namespace UspgPOS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre,MarcaId,ClasificacionId,Precio,Cantidad")] Producto producto)
+        public async Task<IActionResult> Create([Bind("Id,Nombre,MarcaId,ClasificacionId,Precio,Cantidad")] Producto producto, IFormFile imageFile)
         {
             if (ModelState.IsValid)
             {
+                if (imageFile != null)
+                {
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(imageFile.FileName, imageFile.OpenReadStream()),
+                        Transformation = new Transformation().Width(500).Height(500).Crop("fill")
+                    };
+
+                    var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                    producto.ImgUrl = uploadResult.SecureUrl.ToString();
+
+                    var thumbnailParams = new Transformation().Width(150).Height(150).Crop("thumb");
+
+                    producto.ThumbnailUrl = _cloudinary.Api.UrlImgUp.Transform(thumbnailParams).BuildUrl(uploadResult.PublicId);
+
+
+                }
                 _context.Add(producto);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -95,7 +116,7 @@ namespace UspgPOS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Nombre,MarcaId,ClasificacionId,Precio,Cantidad")] Producto producto)
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Nombre,MarcaId,ClasificacionId,Precio,Cantidad")] Producto producto, IFormFile imageFile)
         {
             if (id != producto.Id)
             {
@@ -106,6 +127,23 @@ namespace UspgPOS.Controllers
             {
                 try
                 {
+                    if (imageFile != null)
+                    {
+                        var uploadParams = new ImageUploadParams()
+                        {
+                            File = new FileDescription(imageFile.FileName, imageFile.OpenReadStream()),
+                            Transformation = new Transformation().Width(500).Height(500).Crop("fill")
+                        };
+
+                        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                        producto.ImgUrl = uploadResult.SecureUrl.ToString();
+
+                        var thumbnailParams = new Transformation().Width(150).Height(150).Crop("thumb");
+
+                        producto.ThumbnailUrl = _cloudinary.Api.UrlImgUp.Transform(thumbnailParams).BuildUrl(uploadResult.PublicId);
+
+
+                    }
                     _context.Update(producto);
                     await _context.SaveChangesAsync();
                 }

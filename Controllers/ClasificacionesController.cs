@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +15,12 @@ namespace UspgPOS.Controllers
     public class ClasificacionesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly Cloudinary _cloudinary;
 
-        public ClasificacionesController(AppDbContext context)
+        public ClasificacionesController(AppDbContext context, Cloudinary cloudinary)
         {
             _context = context;
+            _cloudinary = cloudinary;
         }
 
         // GET: Clasificaciones
@@ -54,10 +58,27 @@ namespace UspgPOS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre")] Clasificacion clasificacion)
+        public async Task<IActionResult> Create([Bind("Id,Nombre")] Clasificacion clasificacion, IFormFile imageFile)
         {
             if (ModelState.IsValid)
             {
+                if (imageFile != null)
+                {
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(imageFile.FileName, imageFile.OpenReadStream()),
+                        Transformation = new Transformation().Width(500).Height(500).Crop("fill")
+                    };
+
+                    var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                    clasificacion.ImgUrl = uploadResult.SecureUrl.ToString();
+
+                    var thumbnailParams = new Transformation().Width(150).Height(150).Crop("thumb");
+
+                    clasificacion.ThumbnailUrl = _cloudinary.Api.UrlImgUp.Transform(thumbnailParams).BuildUrl(uploadResult.PublicId);
+
+
+                }
                 _context.Add(clasificacion);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -86,7 +107,7 @@ namespace UspgPOS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(long id, [Bind("Id,Nombre")] Clasificacion clasificacion)
+        public async Task<IActionResult> Edit(long id, [Bind("Id,Nombre")] Clasificacion clasificacion, IFormFile imageFile)
         {
             if (id != clasificacion.Id)
             {
@@ -97,6 +118,24 @@ namespace UspgPOS.Controllers
             {
                 try
                 {
+                    if (imageFile != null)
+                    {
+                        var uploadParams = new ImageUploadParams()
+                        {
+                            File = new FileDescription(imageFile.FileName, imageFile.OpenReadStream()),
+                            Transformation = new Transformation().Width(500).Height(500).Crop("fill")
+                        };
+
+                        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                        clasificacion.ImgUrl = uploadResult.SecureUrl.ToString();
+
+                        var thumbnailParams = new Transformation().Width(150).Height(150).Crop("thumb");
+
+                        clasificacion.ThumbnailUrl = _cloudinary.Api.UrlImgUp.Transform(thumbnailParams).BuildUrl(uploadResult.PublicId);
+
+
+                    }
+
                     _context.Update(clasificacion);
                     await _context.SaveChangesAsync();
                 }

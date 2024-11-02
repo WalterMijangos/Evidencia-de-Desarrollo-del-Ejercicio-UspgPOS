@@ -1,3 +1,5 @@
+using CloudinaryDotNet;
+using dotenv.net;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UspgPOS.Data;
@@ -9,6 +11,8 @@ namespace UspgPOS
     {
         public static void Main(string[] args)
         {
+            DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Configuración de la cadena de conexión desde secrets.json
@@ -27,6 +31,14 @@ namespace UspgPOS
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+
+            var cloudinaryAccount = new Account(
+                Environment.GetEnvironmentVariable("CLOUDINARY_NAME"),
+                Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY"),
+                Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")
+            );
+
+            builder.Services.AddSingleton(new Cloudinary(cloudinaryAccount));
 
 
 

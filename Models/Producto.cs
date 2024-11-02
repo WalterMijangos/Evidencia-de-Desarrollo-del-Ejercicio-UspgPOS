@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UspgPOS.Models
 {
@@ -17,10 +18,17 @@ namespace UspgPOS.Models
         public long ClasificacionId { get; set; }
 
         [Column("precio")]
+        [Range(0.01, 1000000)]
         public decimal Precio { get; set; }
 
         [Column("cantidad")]
         public int Cantidad { get; set; }
+
+        [Column("img_url")]
+        public string? ImgUrl { get; set; }
+
+        [Column("thumbnail_url")]
+        public string? ThumbnailUrl { get; set; }
 
         public Marca? Marca { get; set; } // Relacion de uno a uno
 
