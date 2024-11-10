@@ -1,0 +1,118 @@
+﻿@{
+	ViewData["Title"] = "Dashboard";
+}
+
+<div class="row">
+	<div class="col-6">
+		<div class="card">
+			<div id="graficoPromedioDesemepenoSatisfaccion"></div>
+		</div>
+	</div>
+	<div class="col-6">
+		<div class="card">
+			<div id="graficoPuntajeDesemepenoSatisfaccion"></div>
+		</div>
+	</div>
+    <div class="col-6">
+        <div class="card">
+        <div id="treemapEmpleadosDepartamento"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+	.card {
+		padding: 10px;
+		margin: 20px;
+	}
+</style>
+
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const departamentos = @Html.Raw(ViewBag.Departamentos);
+		const promedioDesempeno = @Html.Raw(ViewBag.PromedioDesempeno);
+		const promedioSatisfaccion = @Html.Raw(ViewBag.PromedioSatisfaccion);
+		const puntajeDesempeno = @Html.Raw(ViewBag.PuntajeDesempeno);
+		const puntajeSatisfaccion = @Html.Raw(ViewBag.PuntajeSatisfaccion);
+
+		//variable para  importar los datos o elementos seleccionados que son la cantidad de empleados por departamento
+        const cantidadEmpleadosDepartamentos = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.CantidadEmpleadosDepartamentos));
+
+
+		const configuracionGraficoPromedioDesemepenoSatisfaccion = {
+			chart: {
+				type: 'radar'
+			},
+			series: [
+				{
+					name: 'Desempeño Promedio',
+					data: promedioDesempeno
+				},
+				{
+					name:'Satisfacción Promedio',
+					data: promedioSatisfaccion
+				}
+			],
+			labels: departamentos,
+			title: {
+				text: 'Grafica hecha en clase Comparación de Desempeño y Satisfacción Promedio por Departamento'
+			}
+		}
+		const graficoPromedioDesemepenoSatisfaccion = new ApexCharts(document.getElementById("graficoPromedioDesemepenoSatisfaccion"), configuracionGraficoPromedioDesemepenoSatisfaccion);
+		graficoPromedioDesemepenoSatisfaccion.render();
+		const configuracionGraficoPuntajeDesemepenoSatisfaccion = {
+			chart: {
+				type: 'bar'
+			},
+			series: [
+				{
+					name: 'Desempeño',
+					data: puntajeDesempeno.map(e => e.toFixed(2))
+				},
+				{
+					name: 'Satisfacción',
+					data: puntajeSatisfaccion.map(e => e.toFixed(2))
+				}
+			],
+			xaxis: {
+				categories: departamentos
+			},
+			title: {
+				text: 'Grafica hecha en clase Comparación puntaje de Desempeño y Satisfacción por Departamento'
+			}
+		}
+
+		const graficoPuntajeDesemepenoSatisfaccion = new ApexCharts(
+			document.getElementById('graficoPuntajeDesemepenoSatisfaccion'),
+			configuracionGraficoPuntajeDesemepenoSatisfaccion
+		);
+		graficoPuntajeDesemepenoSatisfaccion.render();
+
+
+		//codigo para hacer la grafica de treemap de la cantidad de empleados por departamentos
+        const configuracionTreemapEmpleadosDepartamento = {
+            series: [
+                {
+					data: cantidadEmpleadosDepartamentos.map(depto => ({
+						x: depto.Departamento,
+						y: depto.Cantidad
+					}))
+                }
+            ],
+            legend: {
+                show: false
+            },
+            chart: {
+                height: 350,
+                type: 'treemap'
+            },
+            title: {
+				text: 'Cantidad de Empleados por Departamento'
+            }
+        };
+
+        const treemapEmpleadosDepartamento = new ApexCharts(document.getElementById("treemapEmpleadosDepartamento"), configuracionTreemapEmpleadosDepartamento);
+        treemapEmpleadosDepartamento.render();
+	})
+</script>
