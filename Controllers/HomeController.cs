@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using UspgPOS.Models;
@@ -98,7 +99,34 @@ namespace UspgPOS.Controllers
 					Cantidad = grupo.Count() })
 				.ToList();
 
-            ViewBag.Departamentos = JsonConvert.SerializeObject(promediosPorDepartamento.Select(grupo => grupo.Departamento).ToList());
+			//Codigo de tarea de graficas
+			var salarioPromedioDepartamento = empleados
+				.GroupBy(empleado => empleado.Departamento)
+				.Select(grupo => new{
+					Departamentos = grupo.Key,
+					SalarioPeomedio = grupo.Average(empleado => empleado.Salario)})
+				.ToList();
+
+			var experienciaPromedioPorPosicion = empleados
+				.GroupBy(empleados => empleados.Posicion)
+				.Select(grupo => new { Posicion = grupo.Key, ExperienciaPromedio = grupo
+				.Average(empleados => empleados.AñosExperiencia) })
+				.ToList();
+
+			
+			var empleadosContratadosPorAnio = empleados
+				.GroupBy(empleados => empleados.FechaContratacion.Year)
+				.Select(grupo => new { 
+					Año = grupo.Key, 
+					Cantidad = grupo.Count() })
+				.OrderBy(empleados => empleados.Año)
+				.ToList();
+
+			
+			
+			
+
+			ViewBag.Departamentos = JsonConvert.SerializeObject(promediosPorDepartamento.Select(grupo => grupo.Departamento).ToList());
 			ViewBag.PromedioDesempeno = JsonConvert.SerializeObject(promediosPorDepartamento.Select(grupo => grupo.PromedioDesempeno).ToList());
 			ViewBag.PromedioSatisfaccion = JsonConvert.SerializeObject(promediosPorDepartamento.Select(grupo => grupo.PromedioSatisfaccion).ToList());
 			ViewBag.PuntajeDesempeno = JsonConvert.SerializeObject(puntajesPorDepartamento.Select(grupo => grupo.PuntajeDesempeno).ToList());
@@ -107,9 +135,15 @@ namespace UspgPOS.Controllers
 			//La viewBag de la cantidad de empleador por departamento 
             ViewBag.CantidadEmpleadosDepartamentos = cantidadEmpleadosDepartamentos;
 
+			ViewBag.SalarioPromedioDepartamento = salarioPromedioDepartamento;
+
+			ViewBag.Posicion = JsonConvert.SerializeObject(experienciaPromedioPorPosicion.Select(g => g.Posicion).ToList());
+			ViewBag.PromedioPorPosicion = JsonConvert.SerializeObject(experienciaPromedioPorPosicion.Select(g => g.ExperienciaPromedio).ToList());
+
+			ViewBag.ContratadosPorAnio = empleadosContratadosPorAnio;
 
 
-            return View();
+			return View();
 		}
 
 

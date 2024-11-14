@@ -3,7 +3,28 @@
 }
 
 <div class="row">
+	
+    <div class="col-6">
+        <div class="card">
+        <div id="treemapEmpleadosDepartamento"></div>
+        </div>
+    </div>
 	<div class="col-6">
+		<div class="card">
+			<div id="graficoSalarioPromedioDepartamento"></div>
+		</div>
+	</div>
+	<div class="col-6">
+		<div class="card">
+			<div id="PromedioPosicionChart"></div>
+		</div>
+	</div>
+	<div class="col-6">
+		<div class="card">
+			<div id="graficoEmpleadosContratadosPorAño"></div>
+		</div>
+	</div>
+	<div class="col-6"> 
 		<div class="card">
 			<div id="graficoPromedioDesemepenoSatisfaccion"></div>
 		</div>
@@ -13,11 +34,6 @@
 			<div id="graficoPuntajeDesemepenoSatisfaccion"></div>
 		</div>
 	</div>
-    <div class="col-6">
-        <div class="card">
-        <div id="treemapEmpleadosDepartamento"></div>
-        </div>
-    </div>
 </div>
 
 <style>
@@ -36,9 +52,10 @@
 		const puntajeDesempeno = @Html.Raw(ViewBag.PuntajeDesempeno);
 		const puntajeSatisfaccion = @Html.Raw(ViewBag.PuntajeSatisfaccion);
 
-		//variable para  importar los datos o elementos seleccionados que son la cantidad de empleados por departamento
-        const cantidadEmpleadosDepartamentos = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.CantidadEmpleadosDepartamentos));
 
+
+		//variable para  importar los datos o elementos seleccionados que son la cantidad de empleados por departamento
+		const cantidadEmpleadosDepartamentos = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.CantidadEmpleadosDepartamentos));
 
 		const configuracionGraficoPromedioDesemepenoSatisfaccion = {
 			chart: {
@@ -50,7 +67,7 @@
 					data: promedioDesempeno
 				},
 				{
-					name:'Satisfacción Promedio',
+					name: 'Satisfacción Promedio',
 					data: promedioSatisfaccion
 				}
 			],
@@ -61,6 +78,7 @@
 		}
 		const graficoPromedioDesemepenoSatisfaccion = new ApexCharts(document.getElementById("graficoPromedioDesemepenoSatisfaccion"), configuracionGraficoPromedioDesemepenoSatisfaccion);
 		graficoPromedioDesemepenoSatisfaccion.render();
+
 		const configuracionGraficoPuntajeDesemepenoSatisfaccion = {
 			chart: {
 				type: 'bar'
@@ -91,28 +109,113 @@
 
 
 		//codigo para hacer la grafica de treemap de la cantidad de empleados por departamentos
-        const configuracionTreemapEmpleadosDepartamento = {
-            series: [
-                {
+		const configuracionTreemapEmpleadosDepartamento = {
+			series: [
+				{
 					data: cantidadEmpleadosDepartamentos.map(depto => ({
 						x: depto.Departamento,
 						y: depto.Cantidad
 					}))
-                }
-            ],
-            legend: {
-                show: false
-            },
-            chart: {
-                height: 350,
-                type: 'treemap'
-            },
-            title: {
+				}
+			],
+			legend: {
+				show: false
+			},
+			chart: {
+				height: 350,
+				type: 'treemap'
+			},
+			title: {
 				text: 'Cantidad de Empleados por Departamento'
-            }
-        };
+			}
+		};
 
-        const treemapEmpleadosDepartamento = new ApexCharts(document.getElementById("treemapEmpleadosDepartamento"), configuracionTreemapEmpleadosDepartamento);
-        treemapEmpleadosDepartamento.render();
+		const treemapEmpleadosDepartamento = new ApexCharts(document.getElementById("treemapEmpleadosDepartamento"), configuracionTreemapEmpleadosDepartamento);
+		treemapEmpleadosDepartamento.render();
+
+	})
+
+</script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+
+		const salarioPromedioPorDepartamento = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.SalarioPromedioDepartamento));
+
+		const configuraciongraficoSalarioPromedioDepartamento = {
+			chart: {
+				type: 'pie'
+			},
+			series: salarioPromedioPorDepartamento.map(empleado => empleado.SalarioPeomedio),
+			labels: salarioPromedioPorDepartamento.map(empleado => empleado.Departamentos),
+			title: {
+				text: 'Grafica de tarea De Salario Promedio por Departamento'
+			}
+		};
+		const graficoSalarioPromedioDepartamento = new ApexCharts(document.getElementById("graficoSalarioPromedioDepartamento"), configuraciongraficoSalarioPromedioDepartamento);
+		graficoSalarioPromedioDepartamento.render();
+
+
+	});
+
+</script>
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+
+		const posiciones = @Html.Raw(ViewBag.Posicion);
+		const promedioPosicion = @Html.Raw(ViewBag.PromedioPorPosicion);
+		
+		const configuracionBar = {
+			chart: {
+				type: 'bar'
+			},
+			series: [
+				{
+					name: 'Promedios por posicion',
+					data: promedioPosicion
+				}
+			],
+			xaxis: {
+				categories: posiciones
+			},
+			title: {
+				text: 'Grafica de tarea De Promedio de años de experiencia por posición'
+			}
+		};
+		
+		const chart = new ApexCharts(
+			document.getElementById("PromedioPosicionChart"),
+			configuracionBar
+		);
+		chart.render();
+	}); 
+</script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function(){
+		const contratadosPorAnio = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ContratadosPorAnio));
+		
+		const configuracion = {
+			chart: {
+				type: 'line',
+				height: 350
+			},
+			series: [{
+				name: 'Empleados contratados',
+				data: contratadosPorAnio.map(item => item.Cantidad) 
+			}],
+			xaxis: {
+				categories: contratadosPorAnio.map(item => item.Año) 
+			},
+			title: {
+				text: 'Grafica de tarea De Cantidad de Empleados Contratados por Año',
+				align: 'center'
+			}
+		};
+		
+		const chart = new ApexCharts(
+			document.getElementById("graficoEmpleadosContratadosPorAño"),
+			configuracion
+		);
+		chart.render();
 	})
 </script>
